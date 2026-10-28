@@ -2,13 +2,29 @@ import { initializeApp, type FirebaseApp } from 'firebase/app'
 import { getAuth, type Auth } from 'firebase/auth'
 import { getFirestore, type Firestore } from 'firebase/firestore'
 
+/**
+ * Netlify 화면에 값을 붙여넣다 보면 따옴표, 끝의 쉼표, 공백, "apiKey:" 같은 이름이
+ * 함께 들어가는 경우가 많아 이를 걷어냅니다. 예: `"AIza...",` → `AIza...`
+ */
+function clean(value: string | undefined): string | undefined {
+  if (!value) return undefined
+  const v = value
+    .trim()
+    .replace(/^[A-Za-z_]+\s*:\s*/, '')
+    .replace(/[,;]+$/, '')
+    .trim()
+    .replace(/^["'`]+|["'`]+$/g, '')
+    .trim()
+  return v || undefined
+}
+
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: clean(import.meta.env.VITE_FIREBASE_API_KEY),
+  authDomain: clean(import.meta.env.VITE_FIREBASE_AUTH_DOMAIN),
+  projectId: clean(import.meta.env.VITE_FIREBASE_PROJECT_ID),
+  storageBucket: clean(import.meta.env.VITE_FIREBASE_STORAGE_BUCKET),
+  messagingSenderId: clean(import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID),
+  appId: clean(import.meta.env.VITE_FIREBASE_APP_ID),
 }
 
 /**

@@ -21,6 +21,8 @@ export function errorMessage(err: unknown): string {
   if (code === 'unavailable') return '서버에 연결할 수 없습니다. 인터넷 연결을 확인해 주세요.'
   if (code === 'failed-precondition' && raw.includes('index')) return `Firestore 색인(index)이 필요합니다. 아래 링크를 눌러 색인을 만든 뒤 몇 분 후 다시 시도해 주세요.\n${raw}`
   if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return '로그인 창이 닫혔습니다. 다시 시도해 주세요.'
+  if (code === 'auth/api-key-not-valid' || code.startsWith('auth/api-key-not-valid') || code === 'auth/invalid-api-key')
+    return 'Firebase API 키가 올바르지 않습니다. Netlify 환경변수 VITE_FIREBASE_API_KEY 값이 Firebase 콘솔의 apiKey와 똑같은지(AIza로 시작, 39글자) 확인한 뒤 다시 배포해 주세요. (README 9단계)'
   if (code === 'auth/unauthorized-domain') return '이 주소는 Firebase 로그인 승인 도메인에 등록되어 있지 않습니다. README의 6단계를 확인해 주세요.'
   if (code === 'auth/configuration-not-found' || code === 'auth/operation-not-allowed') return 'Firebase에서 Google 로그인이 켜져 있지 않습니다. README의 5단계를 확인해 주세요.'
   return raw || '알 수 없는 오류가 발생했습니다.'
