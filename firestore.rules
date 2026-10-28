@@ -1,0 +1,202 @@
+rules_version = '2';
+
+// =====================================================================
+// 연구실 웹사이트 Firestore 보안 규칙
+// ---------------------------------------------------------------------
+// 이 파일 전체를 복사해 Firebase 콘솔 → Firestore Database → 규칙 탭에
+// 붙여넣고 "게시"를 누르세요. (README 8단계)
+//
+// [회원 문서 users/{uid}]
+//  1. 로그인한 사람은 "본인" 문서만, role이 pending인 경우에만 새로 만들 수 있습니다.
+//  2. 본인 문서는 본인과 admin만 읽을 수 있습니다.
+//  3. 본인은 이름·이메일·사진만 고칠 수 있고, role 필드는 절대 바꿀 수 없습니다.
+//  4. role 변경(승인, 권한 해제)과 회원 문서 삭제는 admin만 할 수 있습니다.
+//
+// [게시글 posts/{postId}]
+//  5. 읽기는 role이 member 또는 admin인 사람만 가능합니다.
+//  6. research(연구), lecture(수업자료) 글은 admin만, discussion(토론) 글은 member도 쓸 수 있습니다.
+//  7. 수정·삭제는 작성자 본인 또는 admin만 가능하며, authorUid(작성자)는 생성 후 바꿀 수 없습니다.
+//  8. commentCount(댓글 수)는 일반 수정으로 바꿀 수 없습니다.
+//     예외: 댓글을 쓰는 회원이 댓글 생성과 "함께" 1 증가시키는 경우,
+//           댓글을 지우는 회원이 댓글 삭제와 "함께" 1 감소시키는 경우만 허용합니다.
+//
+// [댓글 posts/{postId}/comments/{commentId}]
+//  9. 읽기와 작성은 member 또는 admin만 가능하며, 작성할 때는 반드시 글의 commentCount를 1 올려야 합니다.
+// 10. 수정은 작성자 본인 또는 admin, 삭제는 작성자 본인 또는 admin만 가능합니다.
+//     (글 작성자가 자기 글을 삭제할 때는 같은 요청 안에서 그 글의 댓글도 함께 지울 수 있습니다)
+//
+// 11. 위에 적지 않은 모든 경로는 읽기·쓰기 모두 거부합니다.
+// =====================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- 공통 함수 ----------
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userPath(uid) {
+      return /databases/$(database)/documents/users/$(uid);
+    }
+
+    function postPath(postId) {
+      return /databases/$(database)/documents/posts/$(postId);
+    }
+
+    function hasProfile() {
+      return signedIn() && exists(userPath(request.auth.uid));
+    }
+
+    // 관리자(교수)인지
+    function isAdmin() {
+      return hasProfile() && get(userPath(request.auth.uid)).data.role == 'admin';
+    }
+
+    // 승인된 회원(member 또는 admin)인지
+    function isMember() {
+      return hasProfile() && get(userPath(request.auth.uid)).data.role in ['member', 'admin'];
+    }
+
+    // 바뀐 필드 목록
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    // ---------- 1~4. 회원 문서 ----------
+
+    match /users/{userId} {
+      allow read: if (signedIn() && request.auth.uid == userId) || isAdmin();
+
+      // 1. 본인 문서를 pending으로만 생성
+      allow create: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.keys().hasOnly(['displayName', 'email', 'photoURL', 'role', 'createdAt'])
+        && request.resource.data.role == 'pending'
+        && request.resource.data.createdAt == request.time;
+
+      // 3. 본인은 role을 바꿀 수 없음 / 4. admin은 role을 바꿀 수 있음
+      allow update: if (signedIn()
+          && request.auth.uid == userId
+          && changedKeys().hasOnly(['displayName', 'email', 'photoURL']))
+        || (isAdmin() && request.resource.data.role in ['admin', 'member', 'pending']);
+
+      allow delete: if isAdmin();
+    }
+
+    // ---------- 5~8. 게시글 ----------
+
+    match /posts/{postId} {
+
+      function validPost(d) {
+        return d.keys().hasOnly(['category', 'title', 'body', 'tags', 'links', 'authorUid', 'authorName', 'createdAt', 'updatedAt', 'commentCount'])
+          && d.keys().hasAll(['category', 'title', 'body', 'tags', 'links', 'authorUid', 'authorName', 'createdAt', 'updatedAt', 'commentCount'])
+          && d.category in ['research', 'lecture', 'discussion']
+          && d.title is string && d.title.size() > 0 && d.title.size() <= 200
+          && d.body is string && d.body.size() <= 100000
+          && d.tags is list && d.tags.size() <= 10
+          && d.links is list && d.links.size() <= 20
+          && d.authorName is string
+          && d.commentCount is int;
+      }
+
+      // 6. 이 종류의 글을 쓸 수 있는지
+      function canWriteCategory(category) {
+        return isAdmin() || (category == 'discussion' && isMember());
+      }
+
+      function isAuthor() {
+        return signedIn() && resource.data.authorUid == request.auth.uid;
+      }
+
+      // 5. 읽기
+      allow read: if isMember();
+
+      // 6. 작성
+      allow create: if canWriteCategory(request.resource.data.category)
+        && validPost(request.resource.data)
+        && request.resource.data.authorUid == request.auth.uid
+        && request.resource.data.commentCount == 0
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+
+      // 7. 수정 (작성자 또는 admin, authorUid·createdAt 고정, commentCount는 admin만 보정 가능)
+      // 8. 댓글 수 ±1 예외 (짝이 되는 댓글 생성·삭제 여부는 아래 댓글 규칙에서 검사)
+      allow update: if isMember() && (
+        (
+          (isAuthor() || isAdmin())
+          && validPost(request.resource.data)
+          && canWriteCategory(request.resource.data.category)
+          && request.resource.data.authorUid == resource.data.authorUid
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.updatedAt == request.time
+          && (isAdmin() || request.resource.data.commentCount == resource.data.commentCount)
+        )
+        || (
+          changedKeys().hasOnly(['commentCount'])
+          && (request.resource.data.commentCount == resource.data.commentCount + 1
+            || (request.resource.data.commentCount == resource.data.commentCount - 1
+              && request.resource.data.commentCount >= 0))
+        )
+      );
+
+      // 7. 삭제
+      allow delete: if isMember() && (isAuthor() || isAdmin());
+
+      // ---------- 9~10. 댓글 ----------
+
+      match /comments/{commentId} {
+
+        function isCommentAuthor() {
+          return signedIn() && resource.data.authorUid == request.auth.uid;
+        }
+
+        function postCountAfter() {
+          return getAfter(postPath(postId)).data.commentCount;
+        }
+
+        function postCountBefore() {
+          return get(postPath(postId)).data.commentCount;
+        }
+
+        // 9. 읽기
+        allow read: if isMember();
+
+        // 9. 작성 — 본인 이름으로만, 글의 commentCount +1과 함께
+        allow create: if isMember()
+          && exists(postPath(postId))
+          && request.resource.data.keys().hasOnly(['body', 'authorUid', 'authorName', 'createdAt'])
+          && request.resource.data.body is string
+          && request.resource.data.body.size() > 0
+          && request.resource.data.body.size() <= 5000
+          && request.resource.data.authorName is string
+          && request.resource.data.authorUid == request.auth.uid
+          && request.resource.data.createdAt == request.time
+          && postCountAfter() == postCountBefore() + 1;
+
+        // 10. 수정 — 본문만, 작성자 또는 admin
+        allow update: if isMember()
+          && (isCommentAuthor() || isAdmin())
+          && changedKeys().hasOnly(['body'])
+          && request.resource.data.body is string
+          && request.resource.data.body.size() > 0
+          && request.resource.data.body.size() <= 5000;
+
+        // 10. 삭제 — admin, 또는 작성자(글의 commentCount -1과 함께),
+        //     또는 글 작성자가 글을 삭제하면서 함께 정리하는 경우
+        allow delete: if isMember() && (
+          isAdmin()
+          || !exists(postPath(postId))
+          || (isCommentAuthor() && postCountAfter() == postCountBefore() - 1)
+          || (get(postPath(postId)).data.authorUid == request.auth.uid && !existsAfter(postPath(postId)))
+        );
+      }
+    }
+
+    // ---------- 11. 그 외 모든 경로 거부 ----------
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

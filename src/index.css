@@ -1,0 +1,16 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --font-sans: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
+  --font-serif: "Noto Serif KR", "Nanum Myeongjo", Georgia, serif;
+  --color-brand-50: #f1f5fa;
+  --color-brand-100: #dde7f2;
+  --color-brand-600: #2c5282;
+  --color-brand-700: #1e3a5f;
+  --color-brand-800: #172c48;
+}
+
+body {
+  @apply bg-stone-50 text-stone-800 antialiased;
+}
