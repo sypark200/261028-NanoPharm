@@ -23,6 +23,9 @@ export function errorMessage(err: unknown): string {
   if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return '로그인 창이 닫혔습니다. 다시 시도해 주세요.'
   if (code === 'auth/api-key-not-valid' || code.startsWith('auth/api-key-not-valid') || code === 'auth/invalid-api-key')
     return (
+      (/[•*●·]/.test(configuredApiKey)
+        ? '복사한 API 키에 가림 문자(•)가 들어 있습니다. 채팅이나 다른 화면에서 가려진 값을 복사하지 말고, Firebase 콘솔 → 프로젝트 설정 → 일반 → 내 앱 → SDK 설정 및 구성 → "구성"에서 apiKey 값을 직접 복사해 넣어 주세요.\n'
+        : '') +
       'Firebase API 키가 올바르지 않습니다. Netlify 환경변수 VITE_FIREBASE_API_KEY 값이 Firebase 콘솔의 apiKey와 똑같은지(AIza로 시작, 39글자) 확인한 뒤 다시 배포해 주세요. (README 9단계)\n' +
       `지금 사이트에 들어간 값: ${JSON.stringify(configuredApiKey)} (${configuredApiKey.length}글자)`
     )
