@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { Markdown } from '../components/Markdown'
+import { PageHeader } from '../components/Section'
 import { ReadOnlyNotice } from '../components/ReadOnlyNotice'
 import { ErrorState, Loading } from '../components/States'
 import { useAuth } from '../hooks/useAuth'
@@ -118,13 +119,16 @@ export function PostEditorPage() {
     }
   }
 
-  const inputClass = 'w-full rounded border border-stone-300 bg-white px-3 py-2 text-sm focus:border-brand-600 focus:outline-none'
+  const inputClass = 'w-full rounded-sm border border-stone-300 bg-white px-3 py-2 text-sm focus:border-brand-600 focus:outline-none'
 
   return (
     <div>
-      <h1 className="font-serif text-2xl font-bold text-stone-900">{isEdit ? '글 수정' : '새 글 쓰기'}</h1>
+      <PageHeader
+        title={isEdit ? '글 수정' : '새 글 쓰기'}
+        crumbs={[{ label: CATEGORIES[category].label, to: CATEGORIES[category].path }, { label: isEdit ? '글 수정' : '새 글 쓰기' }]}
+      />
 
-      <form onSubmit={submit} className="mt-6 space-y-6">
+      <form onSubmit={submit} className="space-y-6 border-t-2 border-brand-800 bg-white px-5 py-6 sm:px-7">
         <div className="grid gap-4 sm:grid-cols-[1fr_12rem]">
           <div>
             <label htmlFor="title" className="mb-1 block text-sm font-medium text-stone-700">
@@ -162,7 +166,7 @@ export function PostEditorPage() {
         <div>
           <div className="mb-1 flex items-end justify-between">
             <span className="text-sm font-medium text-stone-700">본문 (마크다운)</span>
-            <div className="flex rounded border border-stone-300 text-sm" role="tablist">
+            <div className="flex rounded-sm border border-stone-300 text-sm" role="tablist">
               {(['write', 'preview'] as const).map((t) => (
                 <button
                   key={t}
@@ -190,7 +194,7 @@ export function PostEditorPage() {
               <p className="mt-1 text-xs text-stone-500">마크다운 문법: # 제목, **굵게**, - 목록, 1. 번호 목록, | 표 |, &gt; 인용</p>
             </>
           ) : (
-            <div className="min-h-64 rounded border border-stone-300 bg-white p-4">
+            <div className="min-h-64 rounded-sm border border-stone-300 bg-white p-4">
               {body.trim() ? <Markdown>{body}</Markdown> : <p className="text-sm text-stone-400">미리 볼 내용이 없습니다.</p>}
             </div>
           )}
@@ -221,7 +225,7 @@ export function PostEditorPage() {
                 <button
                   type="button"
                   onClick={() => setLinks((prev) => prev.filter((_, j) => j !== i))}
-                  className="shrink-0 rounded border border-stone-300 px-3 py-2 text-sm text-stone-600 hover:bg-red-50 hover:text-red-700"
+                  className="shrink-0 rounded-sm border border-stone-300 px-3 py-2 text-sm text-stone-600 hover:bg-red-50 hover:text-red-700"
                 >
                   삭제
                 </button>
@@ -232,7 +236,7 @@ export function PostEditorPage() {
             <button
               type="button"
               onClick={() => setLinks((prev) => [...prev, { label: '', url: '' }])}
-              className="mt-2 rounded border border-dashed border-stone-400 px-3 py-1.5 text-sm text-stone-600 hover:border-brand-600 hover:text-brand-700"
+              className="mt-2 rounded-sm border border-dashed border-stone-400 px-3 py-1.5 text-sm text-stone-600 hover:border-brand-600 hover:text-brand-700"
             >
               + 링크 추가
             </button>
@@ -243,13 +247,13 @@ export function PostEditorPage() {
 
         <div className="flex flex-wrap items-center justify-end gap-3 border-t border-stone-200 pt-5">
           <ReadOnlyNotice />
-          <Link to={id ? postPath(category, id) : CATEGORIES[category].path} className="rounded border border-stone-300 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50">
+          <Link to={id ? postPath(category, id) : CATEGORIES[category].path} className="rounded-sm border border-stone-300 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50">
             취소
           </Link>
           <button
             type="submit"
             disabled={saving || data.readOnly}
-            className="rounded bg-brand-700 px-5 py-2 text-sm font-medium text-white hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-sm bg-brand-700 px-5 py-2 text-sm font-medium text-white hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? '저장 중…' : isEdit ? '수정 완료' : '등록'}
           </button>

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router'
 import { CommentSection } from '../components/CommentSection'
 import { Markdown } from '../components/Markdown'
+import { PageHeader } from '../components/Section'
 import { ErrorState, Loading } from '../components/States'
 import { useAuth } from '../hooks/useAuth'
 import { CATEGORIES, postPath } from '../lib/categories'
@@ -59,12 +60,10 @@ export function PostDetailPage({ category }: { category: Category }) {
 
   return (
     <article>
-      <Link to={info.path} className="text-sm text-brand-600 hover:underline">
-        ← {info.label} 목록
-      </Link>
+      <PageHeader title={info.label} crumbs={[{ label: info.label, to: info.path }, { label: '글 보기' }]} />
 
-      <header className="mt-4 border-b border-stone-200 pb-5">
-        <h1 className="font-serif text-2xl font-bold leading-snug text-stone-900 sm:text-3xl">{post.title}</h1>
+      <header className="border-t-2 border-brand-800 border-b border-b-stone-200 bg-white px-5 py-6 sm:px-7">
+        <h1 className="text-2xl font-bold leading-snug text-stone-900 sm:text-[1.7rem]">{post.title}</h1>
         <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-stone-500">
           <span className="font-medium text-stone-700">{post.authorName}</span>
           <span aria-hidden>·</span>
@@ -79,7 +78,7 @@ export function PostDetailPage({ category }: { category: Category }) {
               <Link
                 key={tag}
                 to={`${info.path}?tag=${encodeURIComponent(tag)}`}
-                className="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs text-stone-600 hover:bg-brand-50 hover:text-brand-700"
+                className="rounded-sm border border-stone-200 px-2 py-0.5 text-xs text-stone-600 hover:border-brand-600 hover:text-brand-700"
               >
                 #{tag}
               </Link>
@@ -88,14 +87,14 @@ export function PostDetailPage({ category }: { category: Category }) {
         )}
         {canModify && (
           <div className="mt-4 flex gap-2">
-            <Link to={`/posts/${post.id}/edit`} className="rounded border border-stone-300 px-3 py-1.5 text-sm text-stone-700 hover:bg-stone-50">
+            <Link to={`/posts/${post.id}/edit`} className="rounded-sm border border-stone-300 px-3 py-1.5 text-sm text-stone-700 hover:bg-stone-50">
               수정
             </Link>
             <button
               type="button"
               onClick={handleDelete}
               disabled={deleting}
-              className="rounded border border-red-200 px-3 py-1.5 text-sm text-red-700 hover:bg-red-50 disabled:opacity-50"
+              className="rounded-sm border border-red-200 px-3 py-1.5 text-sm text-red-700 hover:bg-red-50 disabled:opacity-50"
             >
               {deleting ? '삭제 중…' : '삭제'}
             </button>
@@ -103,13 +102,13 @@ export function PostDetailPage({ category }: { category: Category }) {
         )}
       </header>
 
-      <div className="mt-6">
+      <div className="border-b border-stone-200 bg-white px-5 py-8 sm:px-7">
         {post.body.trim() ? <Markdown>{post.body}</Markdown> : <p className="text-stone-500">본문이 없습니다.</p>}
       </div>
 
       {post.links.length > 0 && (
-        <section className="mt-8 rounded-lg border border-stone-200 bg-white p-5">
-          <h2 className="text-sm font-semibold text-stone-700">첨부 링크</h2>
+        <section className="border-b border-stone-200 bg-stone-50 px-5 py-5 sm:px-7">
+          <h2 className="text-sm font-bold text-brand-800">첨부 링크</h2>
           <ul className="mt-3 space-y-2">
             {post.links.map((link, i) => (
               <li key={i} className="text-sm">
@@ -125,6 +124,12 @@ export function PostDetailPage({ category }: { category: Category }) {
           </ul>
         </section>
       )}
+
+      <div className="mt-6 text-right">
+        <Link to={info.path} className="inline-block rounded-sm border border-brand-700 px-5 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-50">
+          목록으로
+        </Link>
+      </div>
 
       <CommentSection
         postId={post.id}

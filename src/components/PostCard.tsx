@@ -16,13 +16,13 @@ function excerpt(body: string, max = 120) {
 
 export function PostCard({ post, onTagClick }: { post: Post; onTagClick?: (tag: string) => void }) {
   return (
-    <article className="rounded-lg border border-stone-200 bg-white p-5 transition-shadow hover:shadow-sm">
+    <article className="border-b border-stone-200 px-4 py-4 transition-colors hover:bg-brand-50/50 sm:px-5">
       <Link to={postPath(post.category, post.id)} className="group block">
-        <h2 className="font-serif text-lg font-semibold text-stone-900 group-hover:text-brand-700">{post.title}</h2>
+        <h2 className="text-[17px] font-bold text-stone-900 group-hover:text-brand-700 group-hover:underline">{post.title}</h2>
         {post.body && <p className="mt-1.5 text-sm leading-relaxed text-stone-600">{excerpt(post.body)}</p>}
       </Link>
       <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-stone-500">
-        <span>{post.authorName}</span>
+        <span className="font-medium text-stone-700">{post.authorName}</span>
         <span aria-hidden>·</span>
         <span>{formatDate(post.createdAt)}</span>
         <span aria-hidden>·</span>
@@ -40,7 +40,7 @@ export function PostCard({ post, onTagClick }: { post: Post; onTagClick?: (tag: 
                 key={tag}
                 type="button"
                 onClick={() => onTagClick?.(tag)}
-                className="rounded-full bg-stone-100 px-2 py-0.5 text-stone-600 hover:bg-brand-50 hover:text-brand-700"
+                className="rounded-sm border border-stone-200 px-1.5 py-0.5 text-stone-600 hover:border-brand-600 hover:text-brand-700"
               >
                 #{tag}
               </button>

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Avatar } from '../components/Avatar'
 import { ReadOnlyNotice } from '../components/ReadOnlyNotice'
+import { PageHeader } from '../components/Section'
 import { EmptyState, ErrorState, Loading } from '../components/States'
 import { useAuth } from '../hooks/useAuth'
 import { data, errorMessage } from '../lib/data'
@@ -64,15 +65,12 @@ export function MembersPage() {
 
   return (
     <div>
-      <div className="border-b border-stone-200 pb-5">
-        <h1 className="font-serif text-2xl font-bold text-stone-900 sm:text-3xl">회원 관리</h1>
-        <p className="mt-1 text-sm text-stone-600">
-          처음 로그인한 사람은 "승인 대기"에 나타납니다. 연구실 구성원이 맞으면 승인해 주세요.
-        </p>
-        <div className="mt-2">
-          <ReadOnlyNotice what="회원 권한을 변경" />
-        </div>
-      </div>
+      <PageHeader
+        title="회원 관리"
+        description='처음 로그인한 사람은 "승인 대기"에 나타납니다. 연구실 구성원이 맞으면 승인해 주세요.'
+        crumbs={[{ label: '회원 관리' }]}
+      />
+      <ReadOnlyNotice what="회원 권한을 변경" />
 
       {error && (
         <div className="mt-4">
@@ -117,14 +115,14 @@ function UserGroup({
 }) {
   return (
     <section className="mt-8">
-      <h2 className="text-lg font-semibold text-stone-900">
+      <h2 className="border-l-4 border-brand-700 pl-3 text-lg font-bold text-brand-800">
         {title} <span className="text-sm font-normal text-stone-500">{users.length}명</span>
       </h2>
       <div className="mt-3">
         {users.length === 0 ? (
           <EmptyState title={empty} />
         ) : (
-          <ul className="divide-y divide-stone-100 rounded-lg border border-stone-200 bg-white">
+          <ul className="divide-y divide-stone-200 border-t-2 border-brand-800 border-b border-b-stone-200 bg-white">
             {users.map((u) => (
               <li key={u.uid} className="flex flex-wrap items-center gap-3 px-4 py-3">
                 <Avatar name={u.displayName} photoURL={u.photoURL} size={36} />
@@ -150,7 +148,7 @@ function ActionButton({ busy, onClick, primary, children }: { busy: boolean; onC
       type="button"
       onClick={onClick}
       disabled={busy || data.readOnly}
-      className={`rounded px-3 py-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-50 ${
+      className={`rounded-sm px-3 py-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-50 ${
         primary ? 'bg-brand-700 text-white hover:bg-brand-800' : 'border border-stone-300 text-stone-700 hover:bg-stone-50'
       }`}
     >

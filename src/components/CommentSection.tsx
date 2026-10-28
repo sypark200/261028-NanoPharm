@@ -98,7 +98,7 @@ export function CommentSection({ postId, onCountChange }: { postId: string; onCo
 
   return (
     <section className="mt-10 border-t border-stone-200 pt-8" aria-label="댓글">
-      <h2 className="font-serif text-xl font-semibold text-stone-900">댓글</h2>
+      <h2 className="border-l-4 border-brand-700 pl-3 text-lg font-bold text-brand-800">댓글</h2>
 
       <div className="mt-4 space-y-3">
         {loading ? (
@@ -112,7 +112,7 @@ export function CommentSection({ postId, onCountChange }: { postId: string; onCo
             const mine = user?.uid === c.authorUid
             const canModify = !data.readOnly && (mine || isAdmin)
             return (
-              <div key={c.id} className="rounded-lg border border-stone-200 bg-white p-4">
+              <div key={c.id} className="rounded-sm border border-stone-200 bg-white p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-stone-500">
                   <span>
                     <span className="font-medium text-stone-700">{c.authorName}</span> · {formatDateTime(c.createdAt)}
@@ -144,13 +144,13 @@ export function CommentSection({ postId, onCountChange }: { postId: string; onCo
                       onChange={(e) => setEditText(e.target.value)}
                       maxLength={MAX_COMMENT}
                       rows={3}
-                      className="w-full rounded border border-stone-300 p-2 text-sm focus:border-brand-600 focus:outline-none"
+                      className="w-full rounded-sm border border-stone-300 p-2 text-sm focus:border-brand-600 focus:outline-none"
                     />
                     <div className="mt-2 flex gap-2">
-                      <button type="button" onClick={() => saveEdit(c)} className="rounded bg-brand-700 px-3 py-1 text-xs text-white hover:bg-brand-800">
+                      <button type="button" onClick={() => saveEdit(c)} className="rounded-sm bg-brand-700 px-3 py-1 text-xs text-white hover:bg-brand-800">
                         저장
                       </button>
-                      <button type="button" onClick={() => setEditingId(null)} className="rounded border border-stone-300 px-3 py-1 text-xs text-stone-600">
+                      <button type="button" onClick={() => setEditingId(null)} className="rounded-sm border border-stone-300 px-3 py-1 text-xs text-stone-600">
                         취소
                       </button>
                     </div>
@@ -169,7 +169,7 @@ export function CommentSection({ postId, onCountChange }: { postId: string; onCo
               type="button"
               onClick={loadMore}
               disabled={loadingMore}
-              className="rounded border border-stone-300 bg-white px-4 py-1.5 text-sm text-stone-700 hover:bg-stone-50 disabled:opacity-50"
+              className="rounded-sm border border-stone-300 bg-white px-4 py-1.5 text-sm text-stone-700 hover:bg-stone-50 disabled:opacity-50"
             >
               {loadingMore ? '불러오는 중…' : '댓글 더 보기'}
             </button>
@@ -189,7 +189,7 @@ export function CommentSection({ postId, onCountChange }: { postId: string; onCo
           rows={3}
           disabled={data.readOnly}
           placeholder="댓글을 입력하세요"
-          className="w-full rounded border border-stone-300 bg-white p-3 text-sm focus:border-brand-600 focus:outline-none disabled:bg-stone-100"
+          className="w-full rounded-sm border border-stone-300 bg-white p-3 text-sm focus:border-brand-600 focus:outline-none disabled:bg-stone-100"
         />
         {formError && <div className="mt-2"><ErrorState message={formError} /></div>}
         <div className="mt-2 flex items-center justify-between gap-3">
@@ -197,7 +197,7 @@ export function CommentSection({ postId, onCountChange }: { postId: string; onCo
           <button
             type="submit"
             disabled={data.readOnly || submitting || !draft.trim()}
-            className="ml-auto rounded bg-brand-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="ml-auto rounded-sm bg-brand-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting ? '등록 중…' : '댓글 등록'}
           </button>

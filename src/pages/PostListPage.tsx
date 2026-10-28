@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { PostCard } from '../components/PostCard'
+import { PageHeader } from '../components/Section'
 import { EmptyState, ErrorState, Loading } from '../components/States'
 import { lab } from '../content/lab'
 import { useAuth } from '../hooks/useAuth'
@@ -63,24 +64,25 @@ export function PostListPage({ category }: { category: Category }) {
 
   return (
     <div>
-      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-stone-200 pb-5">
-        <div>
-          <h1 className="font-serif text-2xl font-bold text-stone-900 sm:text-3xl">{info.label}</h1>
-          <p className="mt-1 text-sm text-stone-600">{info.description}</p>
-        </div>
-        {canWrite && (
-          <Link
-            to={`/posts/new?category=${category}`}
-            className="rounded bg-brand-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-800"
-          >
-            새 글 쓰기
-          </Link>
-        )}
-      </div>
+      <PageHeader
+        title={info.label}
+        description={info.description}
+        crumbs={[{ label: info.label }]}
+        actions={
+          canWrite && (
+            <Link
+              to={`/posts/new?category=${category}`}
+              className="rounded-sm bg-white px-4 py-2 text-sm font-semibold text-brand-800 hover:bg-brand-50"
+            >
+              + 새 글 쓰기
+            </Link>
+          )
+        }
+      />
 
       {filterTags.length > 0 && (
-        <div className="mt-5 flex flex-wrap items-center gap-2 text-sm" role="group" aria-label={category === 'lecture' ? '과목 필터' : '태그 필터'}>
-          <span className="mr-1 text-stone-500">{category === 'lecture' ? '과목' : '태그'}</span>
+        <div className="mb-6 flex flex-wrap items-center gap-2 border border-stone-200 bg-white px-4 py-3 text-sm" role="group" aria-label={category === 'lecture' ? '과목 필터' : '태그 필터'}>
+          <span className="mr-2 font-semibold text-brand-800">{category === 'lecture' ? '과목' : '태그'}</span>
           <FilterChip active={!tag} onClick={() => setTag(null)}>
             전체
           </FilterChip>
@@ -92,7 +94,7 @@ export function PostListPage({ category }: { category: Category }) {
         </div>
       )}
 
-      <div className="mt-6 space-y-3">
+      <div>
         {loading ? (
           <Loading />
         ) : error && posts.length === 0 ? (
@@ -103,9 +105,15 @@ export function PostListPage({ category }: { category: Category }) {
           </EmptyState>
         ) : (
           <>
-            {posts.map((post) => (
-              <PostCard key={post.id} post={post} onTagClick={setTag} />
-            ))}
+            <p className="mb-2 text-sm text-stone-500">
+              {tag && <span className="font-semibold text-brand-700">#{tag} · </span>}
+              {cursor != null ? `최근 글 ${posts.length}개` : `전체 ${posts.length}개`}
+            </p>
+            <div className="border-t-2 border-brand-800 bg-white">
+              {posts.map((post) => (
+                <PostCard key={post.id} post={post} onTagClick={setTag} />
+              ))}
+            </div>
             {error && <ErrorState message={error} />}
             {cursor != null && (
               <div className="pt-3 text-center">
@@ -113,7 +121,7 @@ export function PostListPage({ category }: { category: Category }) {
                   type="button"
                   onClick={loadMore}
                   disabled={loadingMore}
-                  className="rounded border border-stone-300 bg-white px-5 py-2 text-sm text-stone-700 hover:bg-stone-50 disabled:opacity-50"
+                  className="rounded-sm border border-brand-700 bg-white px-6 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-50 disabled:opacity-50"
                 >
                   {loadingMore ? '불러오는 중…' : '더 보기'}
                 </button>
@@ -132,8 +140,8 @@ function FilterChip({ active, onClick, children }: { active: boolean; onClick: (
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`rounded-full border px-3 py-1 transition-colors ${
-        active ? 'border-brand-700 bg-brand-700 text-white' : 'border-stone-300 bg-white text-stone-700 hover:border-brand-600'
+      className={`rounded-sm border px-3 py-1 transition-colors ${
+        active ? 'border-brand-700 bg-brand-700 text-white' : 'border-stone-300 bg-white text-stone-700 hover:border-brand-600 hover:text-brand-700'
       }`}
     >
       {children}

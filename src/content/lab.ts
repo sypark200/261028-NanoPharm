@@ -11,6 +11,8 @@ export const lab = {
   name: '나노약제학 연구실',
   /** 영문 이름 */
   nameEn: 'NanoPharm Lab',
+  /** 홈 화면 대표 영역에 보이는 한 줄 문구 */
+  tagline: 'Drug Delivery · Nanomedicine · Pharmaceutics',
   /** 소속 */
   affiliation: '○○대학교 약학대학 제약학과',
   /** 지도교수 */
