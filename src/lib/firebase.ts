@@ -31,6 +31,9 @@ const firebaseConfig = {
  * 필수 환경변수 4개가 모두 채워져 있으면 실제 Firebase를 사용하고,
  * 하나라도 비어 있으면 "Firebase 미설정 모드"(샘플 데이터, 읽기 전용)로 동작합니다.
  */
+/** 사이트에 실제로 들어간 API 키 (오류 안내에서 Firebase 콘솔 값과 비교하도록 보여줍니다) */
+export const configuredApiKey = firebaseConfig.apiKey ?? ''
+
 export const isFirebaseConfigured = Boolean(
   firebaseConfig.apiKey &&
     firebaseConfig.authDomain &&
